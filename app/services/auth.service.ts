@@ -12,6 +12,12 @@ interface RegisterRequest {
   password: string;
   firstName?: string;
   lastName?: string;
+  role?: string; // เพิ่ม role
+  freelancerProfile?: { // เพิ่มข้อมูล freelancer
+    skills: string;
+    experience: string;
+    hourlyRate: number;
+  }
 }
 
 interface AuthResponse {
