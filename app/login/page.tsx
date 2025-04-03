@@ -5,14 +5,26 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authService } from "../services/auth.service";
 import { useAuth } from "../context/AuthContext";
+import { signIn, useSession } from "next-auth/react";
 
 const LoginPage = () => {
   const router = useRouter();
   const { login } = useAuth();
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // ตรวจสอบว่าผู้ใช้เข้าสู่ระบบผ่าน NextAuth หรือไม่
+  if (session && session.user) {
+    // ถ้ามี session แล้ว ให้เช็ค role และเปลี่ยนเส้นทาง
+    if (session.user.role === "freelancer") {
+      router.push("/freelancer");
+    } else {
+      router.push("/");
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,13 +33,44 @@ const LoginPage = () => {
 
     try {
       await login(email, password);
-      router.push("/");
+
+      // หลังจาก login สำเร็จ ให้ดึงข้อมูลผู้ใช้จาก localStorage
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+
+      // ตรวจสอบ role และเปลี่ยนเส้นทางตามความเหมาะสม
+      if (userData?.role === "freelancer") {
+        router.push("/freelancer");
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : "เข้าสู่ระบบล้มเหลว โปรดตรวจสอบอีเมลและรหัสผ่าน"
       );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      // เรียกใช้ signIn จาก next-auth/react พร้อมกับกำหนด redirect: true
+      // และ callbackUrl เพื่อให้ redirect ไปยังหน้าที่กำหนดหลังจากล็อกอินสำเร็จ
+      const result = await signIn("google", {
+        callbackUrl: "/",
+        redirect: true,
+      });
+
+      console.log("Google sign in result:", result);
+
+      // หมายเหตุ: เมื่อตั้งค่า redirect: true แล้ว โค้ดด้านล่างจะไม่ถูกเรียกใช้
+      // เพราะผู้ใช้จะถูกนำไปยัง callbackUrl ทันที
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      setError("เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google");
     } finally {
       setLoading(false);
     }
@@ -196,11 +239,9 @@ const LoginPage = () => {
             <div className="mt-6">
               <button
                 type="button"
-                className="w-full flex items-center justify-center py-3 px-4 border border-gray-700 rounded-lg shadow-md bg-gray-800 hover:bg-gray-700 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-yellow-500 transition-colors"
-                onClick={() => {
-                  // In the future, will connect to Google Auth
-                  console.log("Google login clicked");
-                }}
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full flex items-center justify-center py-3 px-4 border border-gray-700 rounded-lg shadow-md bg-gray-800 hover:bg-gray-700 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg
                   className="h-5 w-5 mr-2"

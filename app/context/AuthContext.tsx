@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 "use client";
 
 import {
@@ -9,12 +8,15 @@ import {
   ReactNode,
 } from "react";
 import { authService } from "../services/auth.service";
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 interface User {
   id: number;
   username: string;
   email: string;
   role: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 interface AuthContextType {
@@ -32,23 +34,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { data: session, status } = useSession();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const checkAuthStatus = () => {
-      try {
-        if (typeof window !== "undefined") {
-          const token = localStorage.getItem("token");
-          const storedUser = localStorage.getItem("user");
+    // Avoid state updates during SSR
+    if (typeof window === "undefined") return;
 
-          if (token && storedUser) {
-            const userData = JSON.parse(storedUser);
-            setUser(userData);
-            setIsAuthenticated(true);
+    // Skip if already initialized and session hasn't changed
+    if (isInitialized && status === "authenticated" && isAuthenticated) return;
+    if (
+      isInitialized &&
+      status === "unauthenticated" &&
+      !isAuthenticated &&
+      !loading
+    )
+      return;
+
+    const checkAuthStatus = async () => {
+      try {
+        setLoading(true);
+
+        // Check NextAuth session
+        if (session && session.user) {
+          console.log("NextAuth session found:", session);
+
+          // Create user data from session
+          const userData = {
+            id: (session.user as any).userId || 0,
+            username: session.user.name || "",
+            email: session.user.email || "",
+            role: (session.user as any).role || "user",
+          };
+
+          setUser(userData);
+          setIsAuthenticated(true);
+
+          // Store data in localStorage for normal system usage
+          if (typeof window !== "undefined") {
+            localStorage.setItem("user", JSON.stringify(userData));
           }
+
+          setLoading(false);
+          setIsInitialized(true);
+          return;
+        }
+
+        // If no NextAuth session, check normal token
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        if (token && storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
         }
       } catch (error) {
         console.error("Error checking auth status:", error);
-        // ถ้ามีปัญหาในการตรวจสอบ ให้ทำการล็อกเอาท์
         if (typeof window !== "undefined") {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
@@ -57,11 +102,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(false);
       } finally {
         setLoading(false);
+        setIsInitialized(true);
       }
     };
 
     checkAuthStatus();
-  }, []);
+  }, [session, status, isInitialized, isAuthenticated]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -84,9 +130,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    authService.logout();
-    setUser(null);
-    setIsAuthenticated(false);
+    // Logout from NextAuth
+    nextAuthSignOut({ redirect: false }).then(() => {
+      // After NextAuth logout, clear local storage
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+      setUser(null);
+      setIsAuthenticated(false);
+
+      // Navigate to home page after logout
+      window.location.href = "/";
+    });
   };
 
   return (

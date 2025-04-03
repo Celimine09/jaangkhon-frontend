@@ -2,22 +2,33 @@
 
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [displayMenu, setDisplayMenu] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   let timeoutId: NodeJS.Timeout;
 
+  // Avoid hydration mismatch by detecting client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const handleMouseEnter = () => {
-    clearTimeout(timeoutId);
+    if (timeoutId) clearTimeout(timeoutId);
     setDisplayMenu(true);
   };
 
   const handleMouseLeave = () => {
-    timeoutId = setTimeout(() => setDisplayMenu(false), 200); // หน่วงเวลา 200ms
+    timeoutId = setTimeout(() => setDisplayMenu(false), 200);
   };
+
+  const handleLogout = useCallback(() => {
+    setDisplayMenu(false);
+    logout();
+  }, [logout]);
 
   return (
     <header className="bg-black border-b border-gray-800 shadow-md">
@@ -64,7 +75,7 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
+            {isClient && isAuthenticated ? (
               <>
                 {/* ส่วนนี้จะแสดงเมื่อล็อกอินแล้ว */}
                 <Link
@@ -116,18 +127,18 @@ const Header = () => {
                       <div className="py-2">
                         <Link
                           href="/profile"
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-yellow-500"
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-yellow-500"
                         >
                           ข้อมูลส่วนตัว
                         </Link>
                         <Link
                           href="/orders"
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-yellow-500"
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-yellow-500"
                         >
                           ประวัติการสั่งซื้อ
                         </Link>
                         <button
-                          onClick={logout}
+                          onClick={handleLogout}
                           className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 hover:text-red-300"
                         >
                           ออกจากระบบ
@@ -148,7 +159,7 @@ const Header = () => {
                 </Link>
                 <Link
                   href="/login"
-                  className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-yellow-500 transition-colors shadow-md"
+                  className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-yellow-500 transition-colors shadow-md"
                 >
                   Login
                 </Link>

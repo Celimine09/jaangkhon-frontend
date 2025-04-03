@@ -1,6 +1,8 @@
-// app/layout.tsx
+"use client";
+
 import { Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "./context/AuthContext";
 
 const inter = Inter({
@@ -13,11 +15,6 @@ const robotoMono = Roboto_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: "Jangkhon Marketplace",
-  description: "ซื้อขายสินค้าออนไลน์",
-};
-
 export default function RootLayout({
   children,
 }: {
@@ -26,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${inter.variable} ${robotoMono.variable} antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+        <SessionProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </SessionProvider>
       </body>
     </html>
   );

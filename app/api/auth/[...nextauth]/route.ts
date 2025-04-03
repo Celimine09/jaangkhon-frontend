@@ -1,7 +1,10 @@
-import NextAuth from 'next-auth';
+import NextAuth from 'next-auth/next';
 import GoogleProvider from 'next-auth/providers/google';
+import { NextAuthOptions } from "next-auth";
 
-export default NextAuth({
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -10,13 +13,11 @@ export default NextAuth({
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
-      // เพิ่มข้อมูลจาก profile ลงใน token
       if (account && profile) {
-        token.role = 'user'; // หรือตรวจสอบและกำหนด role ตามความเหมาะสม
+        token.role = 'user';
         
-        // หากคุณต้องการเชื่อมต่อกับ backend API ของคุณ
         try {
-          const response = await fetch('http://localhost:5000/api/auth/google-verify', {
+          const response = await fetch(`${API_URL}/auth/google-verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -28,9 +29,10 @@ export default NextAuth({
           
           if (response.ok) {
             const data = await response.json();
-            // บันทึกข้อมูลเพิ่มเติมลงใน token
-            token.role = data.user.role;
-            token.userId = data.user.id;
+            if (data.data && data.data.user) {
+              token.role = data.data.user.role;
+              token.userId = data.data.user.id;
+            }
           }
         } catch (error) {
           console.error('Error verifying with backend:', error);
@@ -39,20 +41,22 @@ export default NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // ส่งข้อมูลจาก token ไปยัง client
       if (session.user) {
-        session.user.role = token.role;
+        session.user.role = token.role as string;
+        session.user.userId = token.userId as number;
       }
       return session;
-    },
-    async signIn({ user, account, profile }) {
-      // เพิ่มโค้ดเพื่อบันทึกหรืออัพเดทข้อมูลผู้ใช้ในฐานข้อมูลของคุณที่นี่
-      // ให้ค่า true เพื่ออนุญาตให้เข้าสู่ระบบได้
-      return true;
-    },
+    }
   },
   pages: {
-    signIn: '/login', // กำหนดหน้า login แบบกำหนดเอง
+    signIn: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+  debug: process.env.NODE_ENV === 'development',
+  session: {
+    strategy: 'jwt',
+  }
+};
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
