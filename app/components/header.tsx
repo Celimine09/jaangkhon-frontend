@@ -142,13 +142,13 @@ const Header = () => {
                 {/* ส่วนนี้จะแสดงเมื่อยังไม่ได้ล็อกอิน */}
                 <Link
                   href="/register/freelance"
-                  className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-blue-500 transition-colors shadow-md"
+                  className="px-4 py-2 border border-yellow-500 rounded-md text-sm font-medium text-yellow-500 bg-black hover:bg-gray-900 hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-yellow-500 transition-colors shadow-md"
                 >
                   FreeLance
                 </Link>
                 <Link
                   href="/login"
-                  className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-yellow-500 transition-colors shadow-md"
+                  className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-yellow-500 transition-colors shadow-md"
                 >
                   Login
                 </Link>
