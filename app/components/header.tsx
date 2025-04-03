@@ -61,25 +61,6 @@ const Header = () => {
             {isAuthenticated ? (
               <>
                 {/* ส่วนนี้จะแสดงเมื่อล็อกอินแล้ว */}
-                <Link
-                  href="/cart"
-                  className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors"
-                >
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-blue-600 rounded-full">
-                    0
-                  </span>
-                </Link>
 
                 <div
                   className="relative"
@@ -136,15 +117,15 @@ const Header = () => {
                 {/* ส่วนนี้จะแสดงเมื่อยังไม่ได้ล็อกอิน */}
                 <Link
                   href="/login"
+                  className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  FreeLance
+                </Link>
+                <Link
+                  href="/login"
                   className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
                   Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                >
-                  Register
                 </Link>
               </>
             )}
