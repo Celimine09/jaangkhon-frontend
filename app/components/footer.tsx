@@ -63,8 +63,8 @@ const Footer = () => {
               Contact Us
             </h3>
             <address className="not-italic text-gray-400">
-              <p>123 Sukhumvit Road</p>
-              <p>Bangkok 10110</p>
+              <p>1 Chalong Krung 1 Alley, Lat Krabang,</p>
+              <p> Bangkok 10520, Thailand</p>
               <p className="mt-2">
                 <a
                   href="mailto:contact@jaangkhon.com"
@@ -78,7 +78,7 @@ const Footer = () => {
                   href="tel:+6623456789"
                   className="hover:text-yellow-500 transition-colors"
                 >
-                  02-345-6789
+                  02-376-8883
                 </a>
               </p>
             </address>
