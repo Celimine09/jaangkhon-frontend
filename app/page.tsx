@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Footer from "./components/footer";
 import Header from "./components/header";
+import { useRouter } from 'next/navigation';
 
 // Define TypeScript interfaces
 interface Product {
@@ -16,9 +17,47 @@ interface Product {
 }
 
 const LuxuryHomePage: React.FC = () => {
-  const [isAuthenticated] = useState<boolean>(false);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
+  // Early redirect check - runs before anything else renders
+  useEffect(() => {
+    const checkUserAccess = () => {
+      try {
+        const token = localStorage.getItem("token");
+        const user = localStorage.getItem("user");
+        
+        if (token && user) {
+          const parsedUser = JSON.parse(user);
+          const userRole = parsedUser.role;
+          console.log("User role detected:", userRole);
+          
+          // If not a regular user, redirect immediately
+          if (userRole !== "user") {
+            console.log("Unauthorized access, redirecting to alert page");
+            router.push("/alert");
+            return false;
+          }
+        }
+        return true;
+      } catch (error) {
+        console.error("Error checking user access:", error);
+        return true; // Continue loading on error
+      }
+    };
+
+    // Check access and set loading state
+    const hasAccess = checkUserAccess();
+    setIsLoading(false);
+    
+    // Only load page content if user has access
+    if (hasAccess) {
+      // Initialize products
+      setFilteredProducts(sampleProducts);
+    }
+  }, [router]);
 
   // Sample product data
   const sampleProducts: Product[] = [
@@ -109,24 +148,32 @@ const LuxuryHomePage: React.FC = () => {
 
   // Filter products when selectedCategory changes
   useEffect(() => {
-    if (selectedCategory === "All") {
-      setFilteredProducts(sampleProducts);
-    } else {
-      const filtered = sampleProducts.filter(
-        (product) => product.category === selectedCategory
-      );
-      setFilteredProducts(filtered);
+    if (!isLoading) {
+      if (selectedCategory === "All") {
+        setFilteredProducts(sampleProducts);
+      } else {
+        const filtered = sampleProducts.filter(
+          (product) => product.category === selectedCategory
+        );
+        setFilteredProducts(filtered);
+      }
     }
-  }, [selectedCategory]);
-
-  // Initialize with all products on component mount
-  useEffect(() => {
-    setFilteredProducts(sampleProducts);
-  }, []);
+  }, [selectedCategory, isLoading]);
 
   const handleCategoryClick = (category: string): void => {
     setSelectedCategory(category);
   };
+
+  // If still checking permissions, show minimal loading UI
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-black text-white">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
