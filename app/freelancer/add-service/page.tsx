@@ -6,13 +6,13 @@ import Link from "next/link";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
 import { useAuth } from "../../context/AuthContext";
+import { api } from "../../services/api";
 
 interface ServiceFormData {
   title: string;
   description: string;
   price: string;
   category: string;
-  image?: File | null;
 }
 
 const AddServicePage: React.FC = () => {
@@ -23,11 +23,9 @@ const AddServicePage: React.FC = () => {
     description: "",
     price: "",
     category: "Web Development", // ค่าเริ่มต้น
-    image: null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [preview, setPreview] = useState<string | null>(null);
 
   // Categories for the dropdown
   const categories = [
@@ -53,23 +51,6 @@ const AddServicePage: React.FC = () => {
       ...prev,
       [name]: value,
     }));
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setFormData((prev) => ({
-        ...prev,
-        image: file,
-      }));
-
-      // สร้าง URL สำหรับแสดงตัวอย่างรูปภาพ
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,19 +82,22 @@ const AddServicePage: React.FC = () => {
     }
 
     try {
-      // ในการใช้งานจริง คุณจะส่งข้อมูลไปยัง API
-      // const response = await api.post('/freelancer/services', {
-      //   title: formData.title,
-      //   description: formData.description,
-      //   price: Number(formData.price),
-      //   category: formData.category,
-      //   // สำหรับรูปภาพ คุณอาจจะต้องใช้ FormData
-      // });
+      // สร้าง service object ที่จะส่งไปยัง API
+      const serviceData = {
+        name: formData.title,
+        description: formData.description,
+        price: Number(formData.price),
+        category: formData.category,
+        stock: 1, // กำหนดค่าเริ่มต้น
+        isActive: true,
+      };
 
-      // จำลองการส่งข้อมูลสำเร็จ
-      console.log("Service submitted:", formData);
+      // ส่งข้อมูลไปยัง API
+      const response = await api.post("/products", serviceData);
 
-      // รอสักครู่ก่อนเปลี่ยนหน้า (จำลองการส่ง API)
+      console.log("Service created successfully:", response);
+
+      // แสดงข้อความสำเร็จและเปลี่ยนเส้นทาง
       setTimeout(() => {
         router.push("/freelancer");
       }, 1000);
@@ -296,73 +280,6 @@ const AddServicePage: React.FC = () => {
                       className="appearance-none block w-full pl-10 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                       placeholder="0"
                     />
-                  </div>
-                </div>
-
-                {/* รูปภาพ */}
-                <div>
-                  <label
-                    htmlFor="image"
-                    className="block text-sm font-medium text-gray-300 mb-1"
-                  >
-                    Service Image
-                  </label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-lg">
-                    <div className="space-y-1 text-center">
-                      {preview ? (
-                        <div className="mb-4">
-                          <img
-                            src={preview}
-                            alt="Preview"
-                            className="mx-auto h-40 w-auto object-cover rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setPreview(null);
-                              setFormData((prev) => ({ ...prev, image: null }));
-                            }}
-                            className="mt-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-500 bg-red-900/20 hover:bg-red-900/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-red-500"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ) : (
-                        <svg
-                          className="mx-auto h-12 w-12 text-gray-500"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      )}
-                      <div className="flex text-sm text-gray-400">
-                        <label
-                          htmlFor="image"
-                          className="relative cursor-pointer rounded-md font-medium text-yellow-500 hover:text-yellow-400 focus-within:outline-none"
-                        >
-                          <span>Upload a file</span>
-                          <input
-                            id="image"
-                            name="image"
-                            type="file"
-                            accept="image/*"
-                            className="sr-only"
-                            onChange={handleImageChange}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, GIF up to 5MB
-                      </p>
-                    </div>
                   </div>
                 </div>
 
