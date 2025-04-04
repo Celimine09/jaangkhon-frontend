@@ -14,6 +14,7 @@ const RegisterPage = () => {
     confirmPassword: "",
     firstName: "",
     lastName: "",
+    role: "user", // ค่าเริ่มต้นเป็น user
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,6 +24,13 @@ const RegisterPage = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleRoleChange = (role: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      role,
     }));
   };
 
@@ -62,6 +70,7 @@ const RegisterPage = () => {
         password: formData.password,
         firstName: formData.firstName || "",
         lastName: formData.lastName || "",
+        role: formData.role, // ส่งข้อมูล role ไปด้วย
       });
 
       // Redirect to login page after successful registration
@@ -252,6 +261,94 @@ const RegisterPage = () => {
                 className="appearance-none block w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                 placeholder="••••••••"
               />
+            </div>
+
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                Account Type
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange("user")}
+                  className={`flex flex-col items-center justify-center p-4 border ${
+                    formData.role === "user"
+                      ? "border-yellow-500 bg-yellow-500/10"
+                      : "border-gray-700 bg-gray-800"
+                  } rounded-lg transition-all duration-200 hover:border-yellow-500/70`}
+                >
+                  <div className="w-12 h-12 flex items-center justify-center bg-gray-700 rounded-full mb-2">
+                    <svg
+                      className={`w-6 h-6 ${
+                        formData.role === "user"
+                          ? "text-yellow-500"
+                          : "text-gray-400"
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      formData.role === "user" ? "text-white" : "text-gray-400"
+                    }`}
+                  >
+                    User
+                  </span>
+                  <span className="text-xs text-gray-500 mt-1 text-center">
+                    Regular customer account
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange("admin")}
+                  className={`flex flex-col items-center justify-center p-4 border ${
+                    formData.role === "admin"
+                      ? "border-yellow-500 bg-yellow-500/10"
+                      : "border-gray-700 bg-gray-800"
+                  } rounded-lg transition-all duration-200 hover:border-yellow-500/70`}
+                >
+                  <div className="w-12 h-12 flex items-center justify-center bg-gray-700 rounded-full mb-2">
+                    <svg
+                      className={`w-6 h-6 ${
+                        formData.role === "admin"
+                          ? "text-yellow-500"
+                          : "text-gray-400"
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      formData.role === "admin" ? "text-white" : "text-gray-400"
+                    }`}
+                  >
+                    Admin
+                  </span>
+                  <span className="text-xs text-gray-500 mt-1 text-center">
+                    Administrative privileges
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center">
