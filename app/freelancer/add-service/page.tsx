@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "../../components/header";
@@ -26,6 +26,19 @@ const AddServicePage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // ตรวจสอบการล็อกอินและบทบาทของผู้ใช้
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    if (user && user.role !== "freelancer") {
+      router.push("/alert");
+      return;
+    }
+  }, [isAuthenticated, user, router]);
 
   // Categories for the dropdown
   const categories = [
@@ -81,6 +94,12 @@ const AddServicePage: React.FC = () => {
       return;
     }
 
+    if (!user || !user.id) {
+      setError("You need to be logged in to create a service");
+      setLoading(false);
+      return;
+    }
+
     try {
       // สร้าง service object ที่จะส่งไปยัง API
       const serviceData = {
@@ -90,7 +109,10 @@ const AddServicePage: React.FC = () => {
         category: formData.category,
         stock: 1, // กำหนดค่าเริ่มต้น
         isActive: true,
+        // ไม่ต้องส่ง userId เพราะ backend จะดึงจาก JWT token (req.user.id)
       };
+
+      console.log("Sending service data:", serviceData);
 
       // ส่งข้อมูลไปยัง API
       const response = await api.post("/products", serviceData);
@@ -103,15 +125,41 @@ const AddServicePage: React.FC = () => {
       }, 1000);
     } catch (err) {
       console.error("Error adding service:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to add service. Please try again."
-      );
+
+      // ดึงข้อความ error จาก response ของ API (ถ้ามี)
+      let errorMessage = "Failed to add service. Please try again.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "object" && err !== null) {
+        // ตรวจสอบว่ามี response data หรือไม่
+        const anyErr = err as any;
+        if (
+          anyErr.response &&
+          anyErr.response.data &&
+          anyErr.response.data.message
+        ) {
+          errorMessage = anyErr.response.data.message;
+        }
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
+  // ถ้ากำลังตรวจสอบการล็อกอิน
+  if (loading && !user) {
+    return (
+      <div className="min-h-screen flex flex-col bg-black text-white">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
@@ -280,6 +328,34 @@ const AddServicePage: React.FC = () => {
                       className="appearance-none block w-full pl-10 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                       placeholder="0"
                     />
+                  </div>
+                </div>
+
+                {/* แสดงข้อมูลผู้สร้าง service */}
+                <div className="mt-4">
+                  <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <h3 className="text-sm font-medium text-gray-300 mb-2">
+                      Service Provider Information
+                    </h3>
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500 mr-3">
+                        {user?.firstName?.charAt(0) ||
+                          user?.username?.charAt(0) ||
+                          "U"}
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">
+                          {user?.username || "User"}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {user?.email || ""}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500">
+                      You are creating this service as a freelancer. Your
+                      profile information will be shown to potential clients.
+                    </p>
                   </div>
                 </div>
 
