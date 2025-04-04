@@ -103,6 +103,7 @@ const ProfilePage: React.FC = () => {
   }, [isAuthenticated, router]);
 
   const handleEdit = () => {
+    setActiveTab("profile")
     setIsEditing(true);
     setEditProfile({ ...userProfile! });
   };
@@ -512,55 +513,7 @@ const ProfilePage: React.FC = () => {
                   <h2 className="text-2xl font-bold">ตั้งค่า</h2>
 
                   <div className="space-y-6">
-                    {/* Password Change Section */}
-                    <div className="p-6 border border-gray-800 rounded-lg">
-                      <h3 className="text-lg font-medium mb-4">
-                        เปลี่ยนรหัสผ่าน
-                      </h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-400 mb-1">
-                            รหัสผ่านปัจจุบัน
-                          </label>
-                          <input
-                            type="password"
-                            className="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-400 mb-1">
-                            รหัสผ่านใหม่
-                          </label>
-                          <input
-                            type="password"
-                            className="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-400 mb-1">
-                            ยืนยันรหัสผ่านใหม่
-                          </label>
-                          <input
-                            type="password"
-                            className="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 text-white"
-                          />
-                        </div>
-                        <div>
-                          <button
-                            className="px-4 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-400 transition-colors"
-                            onClick={async () => {
-                              // In a real app, you would validate and update password
-                              alert(
-                                "ฟังก์ชันนี้จะเชื่อมต่อกับ API ในแอปพลิเคชันจริง"
-                              );
-                            }}
-                          >
-                            อัปเดตรหัสผ่าน
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
+                    
                     {/* Notification Settings */}
                     <div className="p-6 border border-gray-800 rounded-lg">
                       <h3 className="text-lg font-medium mb-4">การแจ้งเตือน</h3>
