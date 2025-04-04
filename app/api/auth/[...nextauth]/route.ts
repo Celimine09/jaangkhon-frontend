@@ -17,6 +17,7 @@ export const authOptions: NextAuthOptions = {
         token.role = 'user';
         
         try {
+          // เรียกใช้ API เพื่อยืนยันข้อมูลผู้ใช้จาก Google
           const response = await fetch(`${API_URL}/auth/google-verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -29,9 +30,13 @@ export const authOptions: NextAuthOptions = {
           
           if (response.ok) {
             const data = await response.json();
-            if (data.data && data.data.user) {
+            if (data.success && data.data) {
+              // เก็บข้อมูลที่จำเป็นลงใน token
               token.role = data.data.user.role;
               token.userId = data.data.user.id;
+              
+              // เก็บ JWT token ที่ได้จาก backend
+              token.accessToken = data.data.token;
             }
           }
         } catch (error) {
@@ -44,6 +49,9 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.role = token.role as string;
         session.user.userId = token.userId as number;
+        
+        // เพิ่ม accessToken เข้าไปใน session สำหรับใช้ในฝั่ง client
+        (session as any).accessToken = token.accessToken;
       }
       return session;
     }

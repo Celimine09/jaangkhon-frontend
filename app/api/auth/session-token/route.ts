@@ -4,27 +4,37 @@ export async function POST(req: NextRequest) {
   try {
     const { email, authProvider } = await req.json();
     
-    // ในกรณีนี้คุณควรเชื่อมต่อกับ API หลักของคุณเพื่อดึง token
+    // เชื่อมต่อกับ API หลักของคุณเพื่อขอ token
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     
-    const response = await fetch(`${API_URL}/auth/get-token`, {
+    console.log(`Requesting token for ${email} via ${authProvider}`);
+    
+    const response = await fetch(`${API_URL}/auth/google-verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, authProvider }),
+      body: JSON.stringify({ 
+        email, 
+        name: email.split('@')[0], // ใส่ข้อมูลพื้นฐาน
+        image: '' 
+      }),
     });
     
     if (!response.ok) {
-      throw new Error('Failed to get token from backend');
+      throw new Error(`Failed to get token from backend: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
     
+    if (!data.success || !data.data?.token) {
+      throw new Error('Token not found in response');
+    }
+    
     return NextResponse.json({
       success: true,
       data: {
-        token: data.token || data.data?.token
+        token: data.data.token
       }
     });
   } catch (error) {

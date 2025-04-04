@@ -54,41 +54,97 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkAuthStatus = async () => {
       try {
         setLoading(true);
+        console.log("Checking auth status. NextAuth session status:", status);
 
         // Check NextAuth session
         if (session && session.user) {
           console.log("NextAuth session found:", session);
 
-          // Create user data from session
-          const userData = {
-            id: (session.user as any).userId || 0,
-            username: session.user.name || "",
-            email: session.user.email || "",
-            role: (session.user as any).role || "user",
-          };
+          // ดึง token จาก session (ที่ได้จากการแก้ไข NextAuth callback)
+          const accessToken = (session as any).accessToken;
 
-          setUser(userData);
-          setIsAuthenticated(true);
+          if (accessToken) {
+            console.log("JWT token found in NextAuth session");
 
-          // Store data in localStorage for normal system usage
-          if (typeof window !== "undefined") {
-            localStorage.setItem("user", JSON.stringify(userData));
+            // Create user data from session
+            const userData = {
+              id: (session.user as any).userId || 0,
+              username: session.user.name || "",
+              email: session.user.email || "",
+              role: (session.user as any).role || "user",
+            };
+
+            // Store data in localStorage
+            if (typeof window !== "undefined") {
+              localStorage.setItem("token", accessToken);
+              localStorage.setItem("user", JSON.stringify(userData));
+            }
+
+            setUser(userData);
+            setIsAuthenticated(true);
+            setLoading(false);
+            setIsInitialized(true);
+            return;
+          } else {
+            console.log(
+              "No JWT token found in NextAuth session, fetching one from API"
+            );
+            // ถ้าไม่มี token ใน session ให้เรียก API เพื่อสร้าง token
+            try {
+              const response = await fetch("/api/auth/session-token", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  email: session.user.email,
+                  authProvider: "google",
+                }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data?.token) {
+                  console.log("Successfully retrieved token from API");
+
+                  // Create user data from session
+                  const userData = {
+                    id: (session.user as any).userId || 0,
+                    username: session.user.name || "",
+                    email: session.user.email || "",
+                    role: (session.user as any).role || "user",
+                  };
+
+                  // Store data in localStorage
+                  localStorage.setItem("token", data.data.token);
+                  localStorage.setItem("user", JSON.stringify(userData));
+
+                  setUser(userData);
+                  setIsAuthenticated(true);
+                  setLoading(false);
+                  setIsInitialized(true);
+                  return;
+                }
+              } else {
+                console.error("Failed to get token from API");
+              }
+            } catch (error) {
+              console.error("Error fetching token from API:", error);
+            }
           }
-
-          setLoading(false);
-          setIsInitialized(true);
-          return;
         }
 
-        // If no NextAuth session, check normal token
+        // If no NextAuth session or failed to get token, check normal token
         const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
 
         if (token && storedUser) {
+          console.log("Found token and user in localStorage");
           const userData = JSON.parse(storedUser);
           setUser(userData);
           setIsAuthenticated(true);
         } else {
+          console.log("No auth data found in localStorage");
           setUser(null);
           setIsAuthenticated(false);
         }
