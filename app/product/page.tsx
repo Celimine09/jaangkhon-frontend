@@ -51,6 +51,29 @@ const ProductPage: React.FC = () => {
   const productId = 1;
 
   useEffect(() => {
+    const checkUserAccess = () => {
+      try {
+        const token = localStorage.getItem("token");
+        const user = localStorage.getItem("user");
+        
+        if (token && user) {
+          const parsedUser = JSON.parse(user);
+          const userRole = parsedUser.role;
+          console.log("User role detected:", userRole);
+          
+          // If not a regular user, redirect immediately
+          if (userRole !== "user") {
+            console.log("Unauthorized access, redirecting to alert page");
+            router.push("/alert");
+            return false;
+          }
+        }
+        return true;
+      } catch (error) {
+        console.error("Error checking user access:", error);
+        return true; // Continue loading on error
+      }
+    };
     setIsLoading(false);
 
     // For demonstration, set sample data
@@ -61,7 +84,7 @@ const ProductPage: React.FC = () => {
         "Get a custom-built responsive website with modern design. Includes 5 pages, contact form, SEO optimization, and mobile-friendly layout. Perfect for small businesses, portfolios, or personal brands looking to establish an online presence.",
       price: 12000,
       category: "Web Development",
-      imageUrl: "/images/website-development.jpg",
+      imageUrl: "",
       isActive: true,
       userId: 1,
       rating: 4.7,
@@ -99,17 +122,7 @@ const ProductPage: React.FC = () => {
     setIsLoading(false);
   }, [productId]);
 
-  useEffect(() => {
-      if (!isAuthenticated) {
-        router.push("/login");
-        return;
-      }
-  
-      if (user && user.role !== "user") {
-        router.push("/alert");
-        return;
-      }
-    }, [isAuthenticated, user, router]);
+
 
   const handlePurchase = () => {
     router.push("/payment");
