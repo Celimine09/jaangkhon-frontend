@@ -290,7 +290,7 @@ const LuxuryHomePage: React.FC = () => {
                   key={product.id}
                   className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 transition-transform hover:scale-105"
                 >
-                  <a href={`/product/${product.id}`}>
+                  <a href={`/product`}>
                     <div className="h-48 bg-gray-800 flex items-center justify-center">
                       {product.imageUrl ? (
                         <img

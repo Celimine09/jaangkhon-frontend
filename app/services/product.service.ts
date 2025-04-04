@@ -2,6 +2,7 @@
 import { api } from './api';
 
 interface Product {
+  userId: number;
   id: number;
   name: string;
   description: string;

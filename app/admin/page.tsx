@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import { api } from "../services/api";
+import Link from "next/link";
 
 // Dashboard stats interface
 interface DashboardStats {
@@ -91,10 +92,21 @@ const AdminDashboard: React.FC = () => {
               <span className="text-yellow-500">Dashboard</span>
             </h1>
             <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-600 mb-6"></div>
-            <p className="text-gray-400">
-              Overview of your platform statistics and performance
-            </p>
+            <Link
+              href="/admin/dashboard"
+              className="px-4 py-2 border border-yellow-500 rounded-md text-sm font-medium text-yellow-500 bg-black hover:bg-gray-900 hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-yellow-500 transition-colors shadow-md"
+            >
+              สรุปผล
+            </Link>
+                      
+            <Link
+              href="/admin/user"
+              className="px-4 py-2 border border-yellow-500 rounded-md text-sm font-medium text-yellow-500 bg-black hover:bg-gray-900 hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-yellow-500 transition-colors shadow-md"
+            >
+              ผู้ใช้
+            </Link>
           </div>
+          
 
           {isLoading ? (
             <div className="flex justify-center items-center h-64">

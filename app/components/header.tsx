@@ -156,7 +156,7 @@ const Header = () => {
                           ข้อมูลส่วนตัว
                         </Link>
                         <Link
-                          href="/orders"
+                          href="/profile"
                           className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-yellow-500"
                         >
                           ประวัติการสั่งซื้อ

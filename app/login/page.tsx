@@ -21,6 +21,8 @@ const LoginPage = () => {
     // ถ้ามี session แล้ว ให้เช็ค role และเปลี่ยนเส้นทาง
     if (session.user.role === "freelancer") {
       router.push("/freelancer");
+    } else if (session.user.role === "admin") {
+      router.push("/admin");
     } else {
       router.push("/");
     }
@@ -40,6 +42,8 @@ const LoginPage = () => {
       // ตรวจสอบ role และเปลี่ยนเส้นทางตามความเหมาะสม
       if (userData?.role === "freelancer") {
         router.push("/freelancer");
+      } else if (userData?.role === "admin") {
+        router.push("/admin");
       } else {
         router.push("/");
       }
