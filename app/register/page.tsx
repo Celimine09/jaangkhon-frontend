@@ -39,8 +39,6 @@ const RegisterPage = () => {
     setLoading(true);
     setError("");
 
-    console.log("Form data being submitted:", formData);
-
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
       setError("Password Not Match!");

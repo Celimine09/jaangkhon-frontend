@@ -49,22 +49,21 @@ export const authService = {
       throw error;
     }
   },
-  
+
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      console.log("Sending register data to API:", userData); 
       return await api.post('/auth/register', userData);
     } catch (error) {
       console.error("Register API error:", error);
       throw error;
     }
   },
-  
+
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   },
-  
+
   getCurrentUser: () => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -72,7 +71,7 @@ export const authService = {
     }
     return null;
   },
-  
+
   isAuthenticated: () => {
     return !!localStorage.getItem('token');
   }

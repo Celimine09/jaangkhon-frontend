@@ -37,6 +37,99 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Helper functions to reduce complexity
+  const buildUserDataFromSession = (session: any) => {
+    return {
+      id: (session.user as any).userId || 0,
+      username: session.user.name || "",
+      email: session.user.email || "",
+      role: (session.user as any).role || "user",
+    };
+  };
+
+  const storeUserDataInLocalStorage = (userData: any, token: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
+  };
+
+  const processTokenFromSession = (session: any, accessToken: string) => {
+    // Create user data from session
+    const userData = buildUserDataFromSession(session);
+
+    // Store data in localStorage
+    storeUserDataInLocalStorage(userData, accessToken);
+
+    setUser(userData);
+    setIsAuthenticated(true);
+    setLoading(false);
+    setIsInitialized(true);
+  };
+
+  const fetchTokenFromAPI = async (session: any) => {
+    try {
+      const response = await fetch("/api/auth/session-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: session.user.email,
+          authProvider: "google",
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.token) {
+          // Create user data from session
+          const userData = buildUserDataFromSession(session);
+
+          // Store data in localStorage
+          storeUserDataInLocalStorage(userData, data.data.token);
+
+          setUser(userData);
+          setIsAuthenticated(true);
+          setLoading(false);
+          setIsInitialized(true);
+          return true;
+        }
+      } else {
+        console.error("Failed to get token from API");
+      }
+    } catch (error) {
+      console.error("Error fetching token from API:", error);
+    }
+    return false;
+  };
+
+  const processNextAuthSession = async (session: any) => {
+    // ดึง token จาก session
+    const accessToken = (session as any).accessToken;
+
+    if (accessToken) {
+      processTokenFromSession(session, accessToken);
+      return true;
+    } else {
+      return await fetchTokenFromAPI(session);
+    }
+  };
+
+  const checkLocalStorageAuth = () => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    if (token && storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      setIsAuthenticated(true);
+    } else {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  };
+
   useEffect(() => {
     // Avoid state updates during SSR
     if (typeof window === "undefined") return;
@@ -54,100 +147,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkAuthStatus = async () => {
       try {
         setLoading(true);
-        console.log("Checking auth status. NextAuth session status:", status);
 
         // Check NextAuth session
         if (session && session.user) {
-          console.log("NextAuth session found:", session);
-
-          // ดึง token จาก session (ที่ได้จากการแก้ไข NextAuth callback)
-          const accessToken = (session as any).accessToken;
-
-          if (accessToken) {
-            console.log("JWT token found in NextAuth session");
-
-            // Create user data from session
-            const userData = {
-              id: (session.user as any).userId || 0,
-              username: session.user.name || "",
-              email: session.user.email || "",
-              role: (session.user as any).role || "user",
-            };
-
-            // Store data in localStorage
-            if (typeof window !== "undefined") {
-              localStorage.setItem("token", accessToken);
-              localStorage.setItem("user", JSON.stringify(userData));
-            }
-
-            setUser(userData);
-            setIsAuthenticated(true);
-            setLoading(false);
-            setIsInitialized(true);
+          const sessionProcessed = await processNextAuthSession(session);
+          if (sessionProcessed) {
             return;
-          } else {
-            console.log(
-              "No JWT token found in NextAuth session, fetching one from API"
-            );
-            // ถ้าไม่มี token ใน session ให้เรียก API เพื่อสร้าง token
-            try {
-              const response = await fetch("/api/auth/session-token", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  email: session.user.email,
-                  authProvider: "google",
-                }),
-              });
-
-              if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.data?.token) {
-                  console.log("Successfully retrieved token from API");
-
-                  // Create user data from session
-                  const userData = {
-                    id: (session.user as any).userId || 0,
-                    username: session.user.name || "",
-                    email: session.user.email || "",
-                    role: (session.user as any).role || "user",
-                  };
-
-                  // Store data in localStorage
-                  localStorage.setItem("token", data.data.token);
-                  localStorage.setItem("user", JSON.stringify(userData));
-
-                  setUser(userData);
-                  setIsAuthenticated(true);
-                  setLoading(false);
-                  setIsInitialized(true);
-                  return;
-                }
-              } else {
-                console.error("Failed to get token from API");
-              }
-            } catch (error) {
-              console.error("Error fetching token from API:", error);
-            }
           }
         }
 
         // If no NextAuth session or failed to get token, check normal token
-        const token = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("user");
-
-        if (token && storedUser) {
-          console.log("Found token and user in localStorage");
-          const userData = JSON.parse(storedUser);
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else {
-          console.log("No auth data found in localStorage");
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+        checkLocalStorageAuth();
       } catch (error) {
         console.error("Error checking auth status:", error);
         if (typeof window !== "undefined") {
@@ -163,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     checkAuthStatus();
-  }, [session, status, isInitialized, isAuthenticated]);
+  }, [session, status, isInitialized, isAuthenticated, loading]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);

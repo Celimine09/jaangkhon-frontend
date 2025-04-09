@@ -61,17 +61,10 @@ const LoginPage = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      // เรียกใช้ signIn จาก next-auth/react พร้อมกับกำหนด redirect: true
-      // และ callbackUrl เพื่อให้ redirect ไปยังหน้าที่กำหนดหลังจากล็อกอินสำเร็จ
       const result = await signIn("google", {
         callbackUrl: "/",
         redirect: true,
       });
-
-      console.log("Google sign in result:", result);
-
-      // หมายเหตุ: เมื่อตั้งค่า redirect: true แล้ว โค้ดด้านล่างจะไม่ถูกเรียกใช้
-      // เพราะผู้ใช้จะถูกนำไปยัง callbackUrl ทันที
     } catch (error) {
       console.error("Google sign in error:", error);
       setError("เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google");

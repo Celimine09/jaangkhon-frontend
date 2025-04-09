@@ -9,36 +9,36 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export async function fetchApi(endpoint: string, options: ApiOptions) {
   const { method, headers = {}, body } = options;
-  
+
   let token = null;
   if (typeof window !== 'undefined') {
     token = localStorage.getItem('token');
   }
-  
+
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  
+
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
-  
+
   try {
-    console.log(`Sending ${method} request to ${API_URL}${endpoint}`);
-    
+
+
     const response = await fetch(`${API_URL}${endpoint}`, {
       method,
       headers: { ...defaultHeaders, ...headers },
       body: body ? JSON.stringify(body) : undefined,
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error(`API Error ${response.status}:`, data);
       throw new Error(data.message || 'Something went wrong');
     }
-    
+
     return data;
   } catch (error) {
     console.error(`Error calling ${endpoint}:`, error);

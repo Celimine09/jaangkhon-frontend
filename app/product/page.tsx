@@ -55,15 +55,13 @@ const ProductPage: React.FC = () => {
       try {
         const token = localStorage.getItem("token");
         const user = localStorage.getItem("user");
-        
+
         if (token && user) {
           const parsedUser = JSON.parse(user);
           const userRole = parsedUser.role;
-          console.log("User role detected:", userRole);
-          
+
           // If not a regular user, redirect immediately
           if (userRole !== "user") {
-            console.log("Unauthorized access, redirecting to alert page");
             router.push("/alert");
             return false;
           }
@@ -122,13 +120,8 @@ const ProductPage: React.FC = () => {
     setIsLoading(false);
   }, [productId]);
 
-
-
   const handlePurchase = () => {
     router.push("/payment");
-
-    // In a real application, you would call an API to initiate purchase
-    console.log(`Purchasing ${quantity} of product ${productId}`);
 
     // Show success message
     setShowSuccessMessage(true);
@@ -208,15 +201,9 @@ const ProductPage: React.FC = () => {
       <div className="bg-gray-900 py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex text-sm">
-            <button
-              className="text-gray-400 hover:text-white"
-            >
-              Home
-            </button>
+            <button className="text-gray-400 hover:text-white">Home</button>
             <span className="mx-2 text-gray-600">/</span>
-            <button
-              className="text-gray-400 hover:text-white"
-            >
+            <button className="text-gray-400 hover:text-white">
               {product.category}
             </button>
             <span className="mx-2 text-gray-600">/</span>
@@ -497,9 +484,7 @@ const ProductPage: React.FC = () => {
               <h2 className="text-2xl font-bold text-white">
                 Similar Services
               </h2>
-              <button
-                className="text-yellow-500 hover:text-yellow-400"
-              >
+              <button className="text-yellow-500 hover:text-yellow-400">
                 View all
               </button>
             </div>

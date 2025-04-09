@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [displayMenu, setDisplayMenu] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [redirectPath, setRedirectPath] = useState<string>('/');
+  const [redirectPath, setRedirectPath] = useState<string>("/");
   let timeoutId: NodeJS.Timeout;
 
   // Avoid hydration mismatch by detecting client-side rendering
@@ -18,12 +18,11 @@ const Header = () => {
     try {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
-      
+
       if (token && user) {
         const parsedUser = JSON.parse(user);
         const userRole = parsedUser.role;
-        console.log("User role detected:", userRole);
-        
+
         if (userRole === "freelancer") {
           setRedirectPath("/freelancer");
         } else if (userRole === "user") {

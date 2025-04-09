@@ -112,20 +112,14 @@ const AddServicePage: React.FC = () => {
         // ไม่ต้องส่ง userId เพราะ backend จะดึงจาก JWT token (req.user.id)
       };
 
-      console.log("Sending service data:", serviceData);
-
       // ส่งข้อมูลไปยัง API
       const response = await api.post("/products", serviceData);
-
-      console.log("Service created successfully:", response);
 
       // แสดงข้อความสำเร็จและเปลี่ยนเส้นทาง
       setTimeout(() => {
         router.push("/freelancer");
       }, 1000);
     } catch (err) {
-      console.error("Error adding service:", err);
-
       // ดึงข้อความ error จาก response ของ API (ถ้ามี)
       let errorMessage = "Failed to add service. Please try again.";
       if (err instanceof Error) {

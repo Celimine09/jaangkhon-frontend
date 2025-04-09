@@ -36,8 +36,6 @@ const RegisterFreelancePage = () => {
     setLoading(true);
     setError("");
 
-    console.log("Form data being submitted:", formData);
-
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
       setError("Password Not Match!");
@@ -60,22 +58,22 @@ const RegisterFreelancePage = () => {
       return;
     }
 
-    try {
-      await authService.register({
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName || "",
-        lastName: formData.lastName || "",
-        role: "freelancer",
-        freelancerProfile: {
-          skills: formData.skills,
-          experience: formData.experience,
-          hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : 0,
-        },
-      });
+    const userData = {
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      firstName: formData.firstName || "",
+      lastName: formData.lastName || "",
+      role: "freelancer",
+      freelancerProfile: {
+        skills: formData.skills,
+        experience: formData.experience,
+        hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : 0,
+      },
+    };
 
-      // Redirect to login page after successful registration
+    try {
+      await authService.register(userData); // ใช้ตัวแปร userData แทนการส่ง object โดยตรง
       router.push("/login");
     } catch (err) {
       console.error("Registration error:", err);

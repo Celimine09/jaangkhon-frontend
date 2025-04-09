@@ -38,8 +38,8 @@ const mapProductToService = (product: any): Service => {
     price: product.price,
     category: product.category,
     imageUrl: product.imageUrl,
-    createdAt: new Date().toISOString().split('T')[0], // Assuming createdAt is not in product
-    status: product.isActive ? "active" : "pending" // Mapping isActive to status
+    createdAt: new Date().toISOString().split("T")[0], // Assuming createdAt is not in product
+    status: product.isActive ? "active" : "pending", // Mapping isActive to status
   };
 };
 
@@ -53,36 +53,34 @@ const FreelancerDashboard: React.FC = () => {
 
   // Get user ID from JWT token
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       if (token) {
         try {
           const decoded = JSON.parse(atob(token.split(".")[1])); // Decode JWT
           setUserId(decoded.userId);
-          console.log("User ID:", decoded.userId);
-        } catch (error) {
-          console.error("Invalid token:", error);
-        }
+        } catch (error) {}
       }
     }
   }, []);
 
   useEffect(() => {
-      if (!isAuthenticated) {
-        router.push("/login");
-        return;
-      }
-  
-      if (user && user.role !== "freelancer") {
-        router.push("/alert");
-        return;
-      }
-    }, [isAuthenticated, user, router]);
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    if (user && user.role !== "freelancer") {
+      router.push("/alert");
+      return;
+    }
+  }, [isAuthenticated, user, router]);
 
   const sampleProfile: FreelancerProfile = {
     id: 1,
     skills: ["React", "Next.js", "TypeScript", "UI/UX Design", "SEO"],
-    experience: "5 years of professional experience in web development and design.",
+    experience:
+      "5 years of professional experience in web development and design.",
     hourlyRate: 800,
     rating: 4.8,
     completedJobs: 32,
@@ -95,19 +93,22 @@ const FreelancerDashboard: React.FC = () => {
     // Fetch products only when userId is available
     if (userId) {
       // Fetch all products and filter by user ID
-      productService.getProducts()
-        .then(products => {
+      productService
+        .getProducts()
+        .then((products) => {
           // Filter products by the userId (assuming products have a userId field)
           // If there's no userId field in products, you'll need to modify the API endpoint
-          const userProducts = products.filter(product => product.userId === userId);
-          
+          const userProducts = products.filter(
+            (product) => product.userId === userId
+          );
+
           // Map products to services
           const mappedServices = userProducts.map(mapProductToService);
           setServices(mappedServices);
           setProfile(sampleProfile);
           setIsLoading(false);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error fetching products:", error);
           setIsLoading(false);
         });
@@ -250,9 +251,7 @@ const FreelancerDashboard: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Tabs */}
             <div className="flex border-b border-gray-800 mb-6">
-              <button
-                className="px-6 py-3 font-medium text-yellow-500 border-b-2 border-yellow-500"
-              >
+              <button className="px-6 py-3 font-medium text-yellow-500 border-b-2 border-yellow-500">
                 My Services
               </button>
               <button
